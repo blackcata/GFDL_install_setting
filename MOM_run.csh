@@ -105,9 +105,9 @@ set executable    = $root/exec/$platform/$type/fms_$type.x      # executable cre
 # KM.Noh 2019 
 set machinefile   = /home/km109/hosts/mvapich2.hosts
 
-#===========================================================================
-# The user need not change any of the following
-#===========================================================================
+#=======================================================================================
+#                   The user need not change any of the following
+#=======================================================================================
 
 if ( $debug || $valgrind ) then
     setenv DEBUG true
@@ -121,6 +121,8 @@ source $root/bin/environs.$platform  # environment variables and loadable module
 set mppnccombine  = $root/bin/mppnccombine.$platform  # path to executable mppnccombine
 set time_stamp    = $root/bin/time_stamp.csh          # path to cshell to generate the date
 
+
+#---------------------------------------------------------------------------------------
 # Check if the user has extracted the input data
 if( $download ) then
     cd $root/data
@@ -143,7 +145,10 @@ if ( ! -d $inputDataDir ) then
         echo "tar zxvf $name.input.tar.gz"
         exit 1
 endif
+#---------------------------------------------------------------------------------------
 
+
+#---------------------------------------------------------------------------------------
 # setup directory structure
 if ( ! -d $expdir )         mkdir -p $expdir
 if ( ! -d $expdir/RESTART ) mkdir -p $expdir/RESTART
@@ -169,7 +174,10 @@ if ( ! -e $fieldtable ) then
     echo "Need to download input data? See ./MOM_run.csh -h"
     exit 1
 endif
+#---------------------------------------------------------------------------------------
 
+
+#---------------------------------------------------------------------------------------
 # Change to expdir
 cd $expdir
 
@@ -177,7 +185,10 @@ cp $namelist   input.nml
 cp $datatable  data_table
 cp $diagtable  diag_table
 cp $fieldtable field_table
+#---------------------------------------------------------------------------------------
 
+
+#---------------------------------------------------------------------------------------
 # Preprocessings
 $root/exp/preprocessing.csh
 
@@ -203,6 +214,7 @@ endif
 if ( $name  == global_0.25_degree_NYF & $npes != 960) then
     set valid_npes = 960
 endif
+#---------------------------------------------------------------------------------------
 
 
 #---------------------------------------------------------------------------------------
@@ -210,6 +222,7 @@ endif
 set runCommand = "mpirun -machinefile $machinefile -np $npes $executable"  # KM.Noh 2019
 echo "About to run the command $runCommand"
 #---------------------------------------------------------------------------------------
+
 if ( $valgrind ) then
     set runCommand = "$mpirunCommand $npes -x LD_PRELOAD=$VALGRIND_MPI_WRAPPERS valgrind --gen-suppressions=all --suppressions=../../test/valgrind_suppressions.txt --main-stacksize=2000000000 --max-stackframe=2000000000 --error-limit=no $executable >fms.out"
 endif
@@ -229,14 +242,16 @@ endif
 #---------------------------------------------------------------------------------------
 # Run the model
 $runCommand > fms.out # KM.Noh 2019
-#---------------------------------------------------------------------------------------
 
 set model_status = $status
 if ( $model_status != 0) then
     echo "ERROR: Model failed to run to completion"
     exit 1
 endif
+#---------------------------------------------------------------------------------------
 
+
+#---------------------------------------------------------------------------------------
 # generate date for file names ---
 set begindate = `$time_stamp -bf digital`
 if ( $begindate == "" ) then
@@ -249,7 +264,10 @@ endif
 if ( -f time_stamp.out ) then
     rm -f time_stamp.out
 endif
+#---------------------------------------------------------------------------------------
 
+
+#---------------------------------------------------------------------------------------
 # combine output files
 if ( $npes > 1 ) then
     set file_previous = ""
@@ -271,12 +289,18 @@ if ( $npes > 1 ) then
         set file_previous = $file
     end
 endif
+#---------------------------------------------------------------------------------------
 
+
+#---------------------------------------------------------------------------------------
 # get a tar restart file
 cd RESTART
 cp $expdir/input.nml .
 cp $expdir/*_table .
+#---------------------------------------------------------------------------------------
 
+
+#---------------------------------------------------------------------------------------
 # combine netcdf files
 if ( $npes > 1 ) then
     # Concatenate blobs restart files. mppnccombine would not work on them.
@@ -324,7 +348,10 @@ if ( $npes > 1 ) then
         set file_previous = $file
     end
 endif
+#---------------------------------------------------------------------------------------
 
+
+#---------------------------------------------------------------------------------------
 # rename ascii files with the date
 foreach out (`ls *.out`)
    mv $out ascii/$begindate.$out
@@ -334,6 +361,7 @@ unset echo
 
 echo end_of_run
 echo "NOTE: Natural end-of-script for experiment $name with model $type at `date`"
+#---------------------------------------------------------------------------------------
 
 exit 0
 
