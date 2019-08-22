@@ -219,16 +219,10 @@ endif
 #---------------------------------------------------------------------------------------
 # generate date for file names ---
 set begindate = `$time_stamp -bf digital`
-if ( $begindate == "" ) then
-    set begindate = tmp`date '+%j%H%M%S'`
-endif
+if ( $begindate == "" ) set begindate = tmp`date '+%j%H%M%S'`
 set enddate = `$time_stamp -ef digital`
-if ( $enddate == "" ) then
-    set enddate = tmp`date '+%j%H%M%S'`
-endif
-if ( -f time_stamp.out ) then
-    rm -f time_stamp.out
-endif
+if ( $enddate == "" )   set enddate = tmp`date '+%j%H%M%S'`
+if ( -f time_stamp.out )  rm -f time_stamp.out
 #---------------------------------------------------------------------------------------
 
 
