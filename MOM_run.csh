@@ -206,7 +206,9 @@ endif
 
 
 #---------------------------------------------------------------------------------------
+# Describe specific runCommand
 set runCommand = "mpirun -machinefile $machinefile -np $npes $executable"  # KM.Noh 2019
+echo "About to run the command $runCommand"
 #---------------------------------------------------------------------------------------
 if ( $valgrind ) then
     set runCommand = "$mpirunCommand $npes -x LD_PRELOAD=$VALGRIND_MPI_WRAPPERS valgrind --gen-suppressions=all --suppressions=../../test/valgrind_suppressions.txt --main-stacksize=2000000000 --max-stackframe=2000000000 --error-limit=no $executable >fms.out"
