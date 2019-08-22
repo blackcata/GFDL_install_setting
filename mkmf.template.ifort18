@@ -26,11 +26,11 @@ endif
 
 MAKEFLAGS += --jobs=2
 
-NETCDF_ROOT = /home/nnz/local/build/netcdf-4.1.1_ifort11_HDF
-MPICH_ROOT  = /home/nnz/local/build/mpich2-1.3_ifort11
+NETCDF_ROOT = /usr/local/netcdf/432_intel18
+MPICH_ROOT  = /usr/local/mpi/intel18/mvapich2-2.2
 #MPICH_ROOT  = /usr/local/mpich
-HDF5_ROOT   = /home/nnz/local/build/hdf5-1.8.5-patch1_zlib-1.2.5_ifort11/lib
-ZLIB_ROOT   = /home/nnz/local/build/zlib-1.2.5
+HDF5_ROOT   = /usr/local/hdf5/1.8.16 
+ZLIB_ROOT   = /usr/local/zlib/1.2.7
 INCLUDE   = -I$(NETCDF_ROOT)/include -I$(MPICH_ROOT)/include
 
 
