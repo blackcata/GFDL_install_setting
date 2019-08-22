@@ -83,9 +83,9 @@ ifeq ($(NETCDF),3)
 endif
 
 ifneq ($(findstring netcdf-4.0.1,$(LOADEDMODULES)),)
-  LIBS := -L$(NETCDF_ROOT)/lib -lnetcdf -L$(HDF5_ROOT)/lib -lhdf5_hl -lhdf5 -lcurl -L$(ZLIB_ROOT)/lib -lz
+  LIBS := -L$(NETCDF_ROOT)/lib -lnetcdff -lnetcdf -L$(HDF5_ROOT)/lib -lhdf5_hl -lhdf5 -lcurl -L$(ZLIB_ROOT)/lib -lz
 else
-  LIBS := -L$(NETCDF_ROOT)/lib -lnetcdf
+  LIBS := -L$(NETCDF_ROOT)/lib -lnetcdff -lnetcdf
 endif
 
 LIBS += -L$(MPICH_ROOT)/lib -lmpich -lpthread -lmpl
