@@ -120,7 +120,7 @@ endif
 #
 # compile mppnccombine.c, needed only if $npes > 1
 if ( ! -f $mppnccombine ) then
-    cc -O -o $mppnccombine -I/usr/local/include -L/usr/local/lib $code_dir/postprocessing/mppnccombine/mppnccombine.c -lm -lnetcdf
+    icc -O -o $mppnccombine -I$netcdf/include -L$netcdf/lib $code_dir/postprocessing/mppnccombine/mppnccombine.c -lm -lnetcdf
 endif
 
 set mkmf_lib = "$mkmf -f -m Makefile -a $code_dir -t $mkmfTemplate"
