@@ -137,19 +137,6 @@ if( $download ) then
     cd $workdir
     tar zxvf $name.input.tar.gz
 endif
-
-if ( ! -d $inputDataDir ) then
-        echo "ERROR: the experiment directory '$inputDataDir' does not exist or does not contain input and preprocessing data directories!"
-        echo "Either use the --download_input_data option or copy the input data from the MOM data directory manually."
-        echo "To manually dowload the data execute the following:"
-        echo "cd $root/data"
-        echo "./get_exp_data.py $name.input.tar.gz"
-        echo "mkdir -p $workdir"
-        echo "cp archives/$name.input.tar.gz $workdir"
-        echo "cd $workdir"
-        echo "tar zxvf $name.input.tar.gz"
-        exit 1
-endif
 #---------------------------------------------------------------------------------------
 
 
@@ -196,29 +183,6 @@ cp $fieldtable field_table
 #---------------------------------------------------------------------------------------
 # Preprocessings
 $root/exp/preprocessing.csh
-
-if ( $type == CM2M & $npes != 45 ) then
-    set valid_npes = 45
-endif
-
-if ( $type == ESM2M & $npes != 90 ) then
-    set valid_npes = 90
-endif
-if ( $type == ICCM & $npes != 54 ) then
-    set valid_npes = 54
-endif
-
-if ( $name  == atlantic1 & $npes != 24) then
-    set valid_npes = 24
-endif
-
-if ( $name  == mom4p1_ebm1 & $npes != 17) then
-    set valid_npes = 17
-endif
-
-if ( $name  == global_0.25_degree_NYF & $npes != 960) then
-    set valid_npes = 960
-endif
 #---------------------------------------------------------------------------------------
 
 
@@ -226,7 +190,6 @@ endif
 # Describe specific runCommand
 set runCommand = "mpirun -machinefile $machinefile -np $npes $executable"  # KM.Noh 2019
 echo "About to run the command $runCommand"
-#---------------------------------------------------------------------------------------
 
 if ( $valgrind ) then
     set runCommand = "$mpirunCommand $npes -x LD_PRELOAD=$VALGRIND_MPI_WRAPPERS valgrind --gen-suppressions=all --suppressions=../../test/valgrind_suppressions.txt --main-stacksize=2000000000 --max-stackframe=2000000000 --error-limit=no $executable >fms.out"
@@ -238,11 +201,8 @@ endif
 
 echo "About to run experiment $name with model $type at `date`. The command is: $runCommand"
 
-if ( $valid_npes ) then
-    echo "ERROR: This experiment is designed to run on $valid_npes pes. Please specify --npes  $valid_npes "
-    echo "Note:  In order to change the default npes for an expeiment the user may need to edit the values of layouts and atmos_npes and ocean_npes in the input.nml and run the mpi command manually in the working dir"
-    exit 1
-endif
+#---------------------------------------------------------------------------------------
+
 
 #---------------------------------------------------------------------------------------
 # Run the model
