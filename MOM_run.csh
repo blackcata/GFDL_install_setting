@@ -7,30 +7,44 @@ set platform      = gfortran     # A unique identifier for your platform
 set npes          = 8            # number of processor
                                  # Note: If you change npes you may need to change
                                  # the layout in the corresponding namelist
+# KM.Noh 2019 
+set StartYear     = 1     #KDH-Loop
+set RestartYear   = 1941
+set EndYear       = 1945  #KDH-Loop
+
 set valid_npes = 0
 set help = 0
 set download = 0
 set debug = 0
 set valgrind = 0
-set argv = (`getopt -u -o h -l type: -l platform: -l npes: -l experiment: -l debug -l valgrind -l help -l download_input_data --  $*`)
+set argv = (`getopt -u -o h -l type: -l platform: -l npes: -l experiment: -l  \
+             startyear: -l restartyear: -l endyear: -l  \
+             debug -l valgrind -l help -l download_input_data --  $*`)
+
 while ("$argv[1]" != "--")
     switch ($argv[1])
         case --type:
-                set type = $argv[2]; shift argv; breaksw
+                set type = $argv[2];        shift argv; breaksw
         case --platform:
-                set platform = $argv[2]; shift argv; breaksw
+                set platform = $argv[2];    shift argv; breaksw
         case --npes:
-                set npes = $argv[2]; shift argv; breaksw
+                set npes = $argv[2];        shift argv; breaksw
         case --experiment:
-                set name = $argv[2]; shift argv; breaksw
+                set name = $argv[2];        shift argv; breaksw
+        case --startyear:
+                set StartYear = $argv[2];   shift argv; breaksw
+        case --restartyear:
+                set RestartYear = $argv[2]; shift argv; breaksw
+        case --endyear:
+                set EndYear = $argv[2];     shift argv; breaksw
         case --debug:
-                set debug = 1; breaksw
+                set debug = 1;     breaksw
         case --valgrind:
-                set valgrind = 1; breaksw
+                set valgrind = 1;  breaksw
         case --help:
-                set help = 1;  breaksw
+                set help = 1;      breaksw
         case -h:
-                set help = 1;  breaksw
+                set help = 1;      breaksw
         case --download_input_data:
                 set download = 1;  breaksw
     endsw
@@ -104,12 +118,8 @@ set namelist      = $inputDataDir/input.nml                  # path to namelist 
 set executable    = $root/exec/$platform/$type/fms_$type.x   # executable created after compilation
 
 #set archive       = $ARCHIVE/$type #Large directory to host the input and output data.
-
 # KM.Noh 2019 
 set machinefile   = /home/km109/hosts/mvapich2.hosts
-set StartYear     = 1     #KDH-Loop
-set RestartYear   = 1941
-set EndYear       = 1945  #KDH-Loop
 #---------------------------------------------------------------------------------------
 
 
