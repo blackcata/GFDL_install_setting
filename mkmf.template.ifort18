@@ -88,7 +88,7 @@ else
   LIBS := -L$(NETCDF_ROOT)/lib -lnetcdff -lnetcdf
 endif
 
-LIBS += -L$(MPICH_ROOT)/lib -lmpich -lpthread -lmpl
+LIBS += -L$(MPICH_ROOT)/lib -lmpichf90 -lmpich -lpthread -lmpl
 LDFLAGS += $(LIBS)
 
 #---------------------------------------------------------------------------
