@@ -86,24 +86,29 @@ if ( $help ) then
     exit 1
 endif
 
-set root          = $cwd:h         # The directory in which you checked out src
-set code_dir      = $root/src                         # source code directory
-set workdir       = $root/work     # where the model is run and model output is produced
-                                   # This is recommended to be a link to the $WORKDIR of the platform.
+
+#---------------------------------------------------------------------------------------
+# Directory setting for experiment
+set root          = $cwd:h          # The directory in which you checked out src
+set code_dir      = $root/src       # Source code directory
+set workdir       = $root/work      # Where the model is run and model output is produced
+                                    # This is recommended to be a link to the $WORKDIR of the platform.
 set expdir        = $workdir/$name
 set inputDataDir  = $expdir/INPUT   # This is path to the directory that contains the input data for this experiment.
-                                     # You should have downloaded and untared this directory from MOM4p1 FTP site.
-set diagtable     = $inputDataDir/diag_table  # path to diagnositics table
-set datatable     = $inputDataDir/data_table  # path to the data override table.
-set fieldtable    = $inputDataDir/field_table # path to the field table
-set namelist      = $inputDataDir/input.nml   # path to namelist file
+                                    # You should have downloaded and untared this directory from MOM4p1 FTP site.
+set diagtable     = $inputDataDir/diag_table                 # path to diagnositics table
+set datatable     = $inputDataDir/data_table                 # path to the data override table.
+set fieldtable    = $inputDataDir/field_table                # path to the field table
+set namelist      = $inputDataDir/input.nml                  # path to namelist file
 
-set executable    = $root/exec/$platform/$type/fms_$type.x      # executable created after compilation
+set executable    = $root/exec/$platform/$type/fms_$type.x   # executable created after compilation
 
 #set archive       = $ARCHIVE/$type #Large directory to host the input and output data.
 
 # KM.Noh 2019 
 set machinefile   = /home/km109/hosts/mvapich2.hosts
+#---------------------------------------------------------------------------------------
+
 
 #=======================================================================================
 #                   The user need not change any of the following
