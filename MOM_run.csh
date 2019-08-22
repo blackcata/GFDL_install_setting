@@ -118,25 +118,12 @@ if ( $debug || $valgrind ) then
     setenv DEBUG true
 endif
 
-#
+#---------------------------------------------------------------------------------------
 # Users must ensure the correct environment file exists for their platform.
-#
 source $root/bin/environs.$platform  # environment variables and loadable modules
 
 set mppnccombine  = $root/bin/mppnccombine.$platform  # path to executable mppnccombine
 set time_stamp    = $root/bin/time_stamp.csh          # path to cshell to generate the date
-
-
-#---------------------------------------------------------------------------------------
-# Check if the user has extracted the input data
-if( $download ) then
-    cd $root/data
-    ./get_exp_data.py $name.input.tar.gz
-    mkdir -p $workdir
-    cp archives/$name.input.tar.gz $workdir
-    cd $workdir
-    tar zxvf $name.input.tar.gz
-endif
 #---------------------------------------------------------------------------------------
 
 
