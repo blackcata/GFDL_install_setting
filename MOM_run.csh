@@ -180,14 +180,12 @@ while ( $year <= $EndYear )
                 exit 1
             else
             # KM.Noh 2019
-                \mv -f $expdir/RESTART/* $expdir/INPUT/.
+                \mv -f $expdir/ReSTART/* $expdir/INPUT/.
             endif
         endif
 
         cp $expdir/INPUT/input.nml $expdir
         cp $expdir/INPUT/*_table $expdir
-
-#---------------------------------------------------------------------------------------
 
 
 #---------------------------------------------------------------------------------------
@@ -326,6 +324,15 @@ while ( $year <= $EndYear )
            mv $out ascii/$begindate.$out
         end
 #---------------------------------------------------------------------------------------
+
+#-------------------------------------------------------------------------------------
+# rename nc files with the date - KDH-loop, KM.Noh 2019
+        foreach ncfile (`/bin/ls *.nc`)
+            mv $ncfile history/$begindate.$ncfile
+        end
+
+        unset echo
+#-------------------------------------------------------------------------------------
 
 
         unset echo
