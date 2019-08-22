@@ -131,7 +131,7 @@ set time_stamp    = $root/bin/time_stamp.csh          # path to cshell to genera
 # setup directory structure
 if ( ! -d $expdir )         mkdir -p $expdir
 if ( ! -d $expdir/RESTART ) mkdir -p $expdir/RESTART
-if ( ! -d $expdir/INPUT ) mkdir -p $expdir/INPUT
+if ( ! -d $expdir/INPUT )   mkdir -p $expdir/INPUT
 
 if ( ! -e $namelist ) then
     echo "ERROR: required input file does not exist $namelist."
@@ -302,12 +302,13 @@ endif
 foreach out (`ls *.out`)
    mv $out ascii/$begindate.$out
 end
+#---------------------------------------------------------------------------------------
+
 
 unset echo
 
 echo end_of_run
 echo "NOTE: Natural end-of-script for experiment $name with model $type at `date`"
-#---------------------------------------------------------------------------------------
 
 exit 0
 
