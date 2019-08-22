@@ -164,14 +164,29 @@ endif
 cd $expdir
 @  year = $RestartYear
 
-#------------------------------------------------------------------------------------#
-#                                       KDH-loop                                     #
-#------------------------------------------------------------------------------------#
+#---------------------------------------------------------------------------------------#
+#                                        KDH-loop                                       #
+#---------------------------------------------------------------------------------------#
 while ( $year <= $EndYear ) 
-        cp $namelist   input.nml
-        cp $datatable  data_table
-        cp $diagtable  diag_table
-        cp $fieldtable field_table
+
+        if ( $year == $StartYear ) then 
+            cp $namelist   input.nml
+            cp $datatable  data_table
+            cp $diagtable  diag_table
+            cp $fieldtable field_table
+        else
+            if ( ! -d $expdir/RESTART ) then
+                echo "ERROR: required restart files do not exist."
+                exit 1
+            else
+            # KM.Noh 2019
+                \mv -f $expdir/RESTART/* $expdir/INPUT/.
+            endif
+        endif
+
+        cp $expdir/INPUT/input.nml $expdir
+        cp $expdir/INPUT/*_table $expdir
+
 #---------------------------------------------------------------------------------------
 
 
