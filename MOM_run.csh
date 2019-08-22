@@ -169,6 +169,7 @@ cd $expdir
 #---------------------------------------------------------------------------------------#
 while ( $year <= $EndYear ) 
 
+        # KM.Noh 2019
         if ( $year == $StartYear ) then 
             cp $namelist   input.nml
             cp $datatable  data_table
@@ -179,7 +180,6 @@ while ( $year <= $EndYear )
                 echo "ERROR: required restart files do not exist."
                 exit 1
             else
-            # KM.Noh 2019
                 \mv -f $expdir/ReSTART/* $expdir/INPUT/.
             endif
         endif
@@ -192,6 +192,19 @@ while ( $year <= $EndYear )
 # Preprocessings
         $root/exp/preprocessing.csh
 #---------------------------------------------------------------------------------------
+
+
+#-------------------------------------------------------------------------------------
+# for 2xCO2 - KDH-loop
+
+        @ obsyear=$year
+        @ preyear=$obsyear - 1
+
+        echo YEAR : $year , $RestartYear , $EndYear
+        echo CO2 YEAR : $year , $obsyear , $preyear
+
+        sed -i "s/co2_dataset_entry = $preyear/co2_dataset_entry = $obsyear/g" $expdir/input.nml
+#-------------------------------------------------------------------------------------
 
 
 #---------------------------------------------------------------------------------------
