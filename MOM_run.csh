@@ -107,6 +107,9 @@ set executable    = $root/exec/$platform/$type/fms_$type.x   # executable create
 
 # KM.Noh 2019 
 set machinefile   = /home/km109/hosts/mvapich2.hosts
+set StartYear     = 1     #KDH-Loop
+set RestartYear   = 1941
+set EndYear       = 1945  #KDH-Loop
 #---------------------------------------------------------------------------------------
 
 
@@ -159,156 +162,163 @@ endif
 #---------------------------------------------------------------------------------------
 # Change to expdir
 cd $expdir
+@  year = $RestartYear
 
-cp $namelist   input.nml
-cp $datatable  data_table
-cp $diagtable  diag_table
-cp $fieldtable field_table
+#------------------------------------------------------------------------------------#
+#                                       KDH-loop                                     #
+#------------------------------------------------------------------------------------#
+while ( $year <= $EndYear ) 
+        cp $namelist   input.nml
+        cp $datatable  data_table
+        cp $diagtable  diag_table
+        cp $fieldtable field_table
 #---------------------------------------------------------------------------------------
 
 
 #---------------------------------------------------------------------------------------
 # Preprocessings
-$root/exp/preprocessing.csh
+        $root/exp/preprocessing.csh
 #---------------------------------------------------------------------------------------
 
 
 #---------------------------------------------------------------------------------------
 # Describe specific runCommand
-set runCommand = "mpirun -machinefile $machinefile -np $npes $executable"  # KM.Noh 2019
-echo "About to run the command $runCommand"
+        set runCommand = "mpirun -machinefile $machinefile -np $npes $executable"  # KM.Noh 2019
+        echo "About to run the command $runCommand"
 
-if ( $valgrind ) then
-    set runCommand = "$mpirunCommand $npes -x LD_PRELOAD=$VALGRIND_MPI_WRAPPERS valgrind --gen-suppressions=all --suppressions=../../test/valgrind_suppressions.txt --main-stacksize=2000000000 --max-stackframe=2000000000 --error-limit=no $executable >fms.out"
-endif
+        if ( $valgrind ) then
+            set runCommand = "$mpirunCommand $npes -x LD_PRELOAD=$VALGRIND_MPI_WRAPPERS valgrind --gen-suppressions=all --suppressions=../../test/valgrind_suppressions.txt --main-stacksize=2000000000 --max-stackframe=2000000000 --error-limit=no $executable >fms.out"
+        endif
 
-if ( $debug ) then
-    set runCommand = "$mpirunCommand --debug $npes $executable >fms.out"
-endif
+        if ( $debug ) then
+            set runCommand = "$mpirunCommand --debug $npes $executable >fms.out"
+        endif
 
-echo "About to run experiment $name with model $type at `date`. The command is: $runCommand"
+        echo "About to run experiment $name with model $type at `date`. The command is: $runCommand"
 
 #---------------------------------------------------------------------------------------
 
 
 #---------------------------------------------------------------------------------------
 # Run the model
-$runCommand > fms.out # KM.Noh 2019
+        $runCommand > fms.out # KM.Noh 2019
 
-set model_status = $status
-if ( $model_status != 0) then
-    echo "ERROR: Model failed to run to completion"
-    exit 1
-endif
+        set model_status = $status
+        if ( $model_status != 0) then
+            echo "ERROR: Model failed to run to completion"
+            exit 1
+        endif
 #---------------------------------------------------------------------------------------
 
 
 #---------------------------------------------------------------------------------------
 # generate date for file names ---
-set begindate = `$time_stamp -bf digital`
-if ( $begindate == "" ) set begindate = tmp`date '+%j%H%M%S'`
-set enddate = `$time_stamp -ef digital`
-if ( $enddate == "" )   set enddate = tmp`date '+%j%H%M%S'`
-if ( -f time_stamp.out )  rm -f time_stamp.out
+        set begindate = `$time_stamp -bf digital`
+        if ( $begindate == "" ) set begindate = tmp`date '+%j%H%M%S'`
+        set enddate = `$time_stamp -ef digital`
+        if ( $enddate == "" )   set enddate = tmp`date '+%j%H%M%S'`
+        if ( -f time_stamp.out )  rm -f time_stamp.out
 #---------------------------------------------------------------------------------------
 
 
 #---------------------------------------------------------------------------------------
 # combine output files
-if ( $npes > 1 ) then
-    set file_previous = ""
-    set multioutput = (`ls *.nc.????`)
-    foreach file ( $multioutput )
-        if ( $file:r != $file_previous:r ) then
-            set input_files = ( `ls $file:r.????` )
-            if ( $#input_files > 0 ) then
-                $mppnccombine -n4 -r $file:r $input_files
-                if ( $status != 0 ) then
-                    echo "ERROR: in execution of mppnccombine -n4 -r on outputs"
-                    echo "Command was: $mppnccombine $file:r $input_files"
-                    break
+        if ( $npes > 1 ) then
+            set file_previous = ""
+            set multioutput = (`ls *.nc.????`)
+            foreach file ( $multioutput )
+                if ( $file:r != $file_previous:r ) then
+                    set input_files = ( `ls $file:r.????` )
+                    if ( $#input_files > 0 ) then
+                        $mppnccombine -n4 -r $file:r $input_files
+                        if ( $status != 0 ) then
+                            echo "ERROR: in execution of mppnccombine -n4 -r on outputs"
+                            echo "Command was: $mppnccombine $file:r $input_files"
+                            break
+                        endif
+                    endif
+                else
+                    continue
                 endif
-            endif
-        else
-            continue
+                set file_previous = $file
+            end
         endif
-        set file_previous = $file
-    end
-endif
 #---------------------------------------------------------------------------------------
 
 
 #---------------------------------------------------------------------------------------
 # get a tar restart file
-cd RESTART
-cp $expdir/input.nml .
-cp $expdir/*_table .
+        cd RESTART
+        cp $expdir/input.nml .
+        cp $expdir/*_table .
 #---------------------------------------------------------------------------------------
 
 
 #---------------------------------------------------------------------------------------
 # combine netcdf files
-if ( $npes > 1 ) then
-    # Concatenate blobs restart files. mppnccombine would not work on them.
-    if ( -f ocean_blobs.res.nc.0000 ) then
-        ncecat ocean_blobs.res.nc.???? ocean_blobs.res.nc
-        rm ocean_blobs.res.nc.????
-    endif
-
-    # Concatenate iceberg restarts
-    if ( -f icebergs.res.nc.0000 ) then
-        ncrcat icebergs.res.nc.???? icebergs.res.nc
-        rm icebergs.res.nc.????
-    endif
-
-    # Land restarts need to be combined with  combine-ncc
-    # More simply just tar them up in this version
-    set land_files = ( cana glac lake land snow soil vegn1 vegn2 )
-    foreach file ( $land_files )
-       set input_files = `/bin/ls ${file}.res.nc.????`
-       if ( $#input_files > 0 ) then
-          tar czf ${file}.res.nc.tar $input_files
-          if ( $status != 0 ) then
-             echo "ERROR: in creating land restarts tarfile"
-             exit 1
-          endif
-          rm $input_files
-       endif
-    end
-
-    set file_previous = ""
-    set multires = (`ls *.nc.????`)
-    foreach file ( $multires )
-        if ( $file:r != $file_previous:r ) then
-            set input_files = ( `ls $file:r.????` )
-            if ( $#input_files > 0 ) then
-                $mppnccombine -n4 -r $file:r $input_files
-                if ( $status != 0 ) then
-                    echo "ERROR: in execution of mppnccombine -n4 -r on restarts"
-                    echo "Command was: $mppnccombine $file:r $input_files"
-                endif
+        if ( $npes > 1 ) then
+            # Concatenate blobs restart files. mppnccombine would not work on them.
+            if ( -f ocean_blobs.res.nc.0000 ) then
+                ncecat ocean_blobs.res.nc.???? ocean_blobs.res.nc
+                rm ocean_blobs.res.nc.????
             endif
-        else
-            continue
+
+            # Concatenate iceberg restarts
+            if ( -f icebergs.res.nc.0000 ) then
+                ncrcat icebergs.res.nc.???? icebergs.res.nc
+                rm icebergs.res.nc.????
+            endif
+
+            # Land restarts need to be combined with  combine-ncc
+            # More simply just tar them up in this version
+            set land_files = ( cana glac lake land snow soil vegn1 vegn2 )
+            foreach file ( $land_files )
+               set input_files = `/bin/ls ${file}.res.nc.????`
+               if ( $#input_files > 0 ) then
+                  tar czf ${file}.res.nc.tar $input_files
+                  if ( $status != 0 ) then
+                     echo "ERROR: in creating land restarts tarfile"
+                     exit 1
+                  endif
+                  rm $input_files
+               endif
+            end
+
+            set file_previous = ""
+            set multires = (`ls *.nc.????`)
+            foreach file ( $multires )
+                if ( $file:r != $file_previous:r ) then
+                    set input_files = ( `ls $file:r.????` )
+                    if ( $#input_files > 0 ) then
+                        $mppnccombine -n4 -r $file:r $input_files
+                        if ( $status != 0 ) then
+                            echo "ERROR: in execution of mppnccombine -n4 -r on restarts"
+                            echo "Command was: $mppnccombine $file:r $input_files"
+                        endif
+                    endif
+                else
+                    continue
+                endif
+                set file_previous = $file
+            end
         endif
-        set file_previous = $file
-    end
-endif
 #---------------------------------------------------------------------------------------
 
 
 #---------------------------------------------------------------------------------------
 # rename ascii files with the date
-foreach out (`ls *.out`)
-   mv $out ascii/$begindate.$out
-end
+        foreach out (`ls *.out`)
+           mv $out ascii/$begindate.$out
+        end
 #---------------------------------------------------------------------------------------
 
 
-unset echo
+        unset echo
 
-echo end_of_run
-echo "NOTE: Natural end-of-script for experiment $name with model $type at `date`"
+        echo end_of_run
+        echo "NOTE: Natural end-of-script for experiment $name with model $type at `date`"
+
+end
 
 exit 0
 
