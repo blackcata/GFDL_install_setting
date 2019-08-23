@@ -1,22 +1,35 @@
 #!/bin/csh -f
 # Minimal runscript for MOM experiments
 
+
+#---------------------------------------------------------------------------------------
+# Basic setup for MOM experiment - GCM type, experiment name, compile type, CPU number
 set type          = MOM_solo       # type of the experiment
 set name          = box1
 set platform      = gfortran     # A unique identifier for your platform
 set npes          = 8            # number of processor
                                  # Note: If you change npes you may need to change
                                  # the layout in the corresponding namelist
-# KM.Noh 2019 
+#---------------------------------------------------------------------------------------
+
+
+#---------------------------------------------------------------------------------------
+# KDH-Loop, KM.Noh 2019 
+# Loop system for each year
 set StartYear     = 1     #KDH-Loop
 set RestartYear   = 1941
-set EndYear       = 1945  #KDH-Loop
+set EndYear       = 1941  #KDH-Loop
+#---------------------------------------------------------------------------------------
 
+
+#---------------------------------------------------------------------------------------
+# Options for experiments
 set valid_npes = 0
 set help = 0
 set download = 0
 set debug = 0
 set valgrind = 0
+
 set argv = (`getopt -u -o h -l type: -l platform: -l npes: -l experiment: -l  \
              startyear: -l restartyear: -l endyear: -l  \
              debug -l valgrind -l help -l download_input_data --  $*`)
@@ -51,7 +64,11 @@ while ("$argv[1]" != "--")
     shift argv
 end
 shift argv
+#---------------------------------------------------------------------------------------
 
+
+#---------------------------------------------------------------------------------------
+# Help statemnets for MOM_run.csh
 if ( $help ) then
     echo "The optional arguments are:"
     echo "--type       followed by the type of the experiment, currently one of the following:"
@@ -99,6 +116,7 @@ if ( $help ) then
     echo 
     exit 1
 endif
+#---------------------------------------------------------------------------------------
 
 
 #---------------------------------------------------------------------------------------
@@ -110,6 +128,7 @@ set workdir       = $root/work      # Where the model is run and model output is
 set expdir        = $workdir/$name
 set inputDataDir  = $expdir/INPUT   # This is path to the directory that contains the input data for this experiment.
                                     # You should have downloaded and untared this directory from MOM4p1 FTP site.
+
 set diagtable     = $inputDataDir/diag_table                 # path to diagnositics table
 set datatable     = $inputDataDir/data_table                 # path to the data override table.
 set fieldtable    = $inputDataDir/field_table                # path to the field table
@@ -117,7 +136,7 @@ set namelist      = $inputDataDir/input.nml                  # path to namelist 
 
 set executable    = $root/exec/$platform/$type/fms_$type.x   # executable created after compilation
 
-#set archive       = $ARCHIVE/$type #Large directory to host the input and output data.
+set archive       = $expdir                                  #Large directory to host the input and output data.
 # KM.Noh 2019 
 set machinefile   = /home/km109/hosts/mvapich2.hosts
 #---------------------------------------------------------------------------------------
@@ -357,6 +376,20 @@ while ( $year <= $EndYear )
         unset echo
 #-------------------------------------------------------------------------------------
 
+#-------------------------------------------------------------------------------------
+# move RESTART files to each year directory - KDH-loop, KM.Noh 2019
+        mkdir -p $archive/BACKUP/history
+        mv -f $expdir/history/* $archive/BACKUP/history
+        sleep 30
+
+        mkdir -p $archive/BACKUP/ascii
+        mv -f $expdir/ascii/* $archive/BACKUP/ascii
+        sleep 30
+
+        mkdir -p $archive/BACKUP/RESTART/{$year}yr
+        cp -f $expdir/RESTART/* $archive/BACKUP/RESTART/{$year}yr
+        sleep 30
+#-------------------------------------------------------------------------------------
 
         unset echo
 
